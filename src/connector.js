@@ -1,7 +1,4 @@
 'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 var BBPromise = require('bluebird');
 var requestPromise = require('request-promise');
 var xml2js = require('xml2js');
@@ -11,6 +8,7 @@ var logger = require('@hoist/logger');
 var url = require('url');
 var _ = require('lodash');
 var errors = require('@hoist/errors');
+
 
 function WorkflowMaxConnector(settings) {
   console.log(settings);
@@ -33,7 +31,7 @@ WorkflowMaxConnector.prototype.get = function (url, queryParams) {
 
 WorkflowMaxConnector.prototype.post = function (url, data) {
   logger.info('inside hoist-connector-workflowmax.post');
-  if (!data) {
+  if(!data){
     throw new errors.connector.request.InvalidError('no data specified in post');
   }
   return this.request('POST', url, null, data);
@@ -41,7 +39,7 @@ WorkflowMaxConnector.prototype.post = function (url, data) {
 
 WorkflowMaxConnector.prototype.put = function (url, data) {
   logger.info('inside hoist-connector-workflowmax.put');
-  if (!data) {
+  if(!data){
     throw new errors.connector.request.InvalidError('no data specified in put');
   }
   return this.request('PUT', url, null, data);
@@ -53,7 +51,7 @@ WorkflowMaxConnector.prototype.delete = function (url, queryParams, data) {
 };
 
 WorkflowMaxConnector.prototype.request = function request(method, path, queryParams, data) {
-  if (!path) {
+  if(!path){
     throw new errors.connector.request.InvalidError('no path specified');
   }
 
@@ -62,48 +60,50 @@ WorkflowMaxConnector.prototype.request = function request(method, path, queryPar
     path: path
   }, 'inside hoist-connector-workflowmax.request');
   // console.log('wfm connector',this);
-  path = path[path.length - 1] === '/' ? path.slice(0, -1) : path;
+  path = path[path.length -1] === '/'? path.slice(0, -1) : path;
   var parsedUrl = url.parse(path, true);
   parsedUrl.search = null;
-  parsedUrl.query = _.extend({ apiKey: this.settings.apiKey, accountKey: this.settings.accountKey }, parsedUrl.query);
+  parsedUrl.query = _.extend({apiKey:this.settings.apiKey, accountKey:this.settings.accountKey}, parsedUrl.query);
 
-  if (queryParams) {
+  if(queryParams) {
     parsedUrl.query = _.extend(parsedUrl.query, queryParams);
   }
 
   path = url.format(parsedUrl);
-  var domain = this.settings.domain ? this.settings.domain : baseUrl;
+  var domain = this.settings.domain? this.settings.domain: baseUrl;
   var uri = url.resolve(domain, path);
   var options = {
-    uri: uri,
-    method: method,
-    resolveWithFullResponse: true
+    uri : uri,
+    method : method,
+    resolveWithFullResponse: true,
   };
 
-  if (method === 'POST' || method === 'PUT') {
-    if (typeof data === 'string') {
-      try {
+  if(method === 'POST' || method === 'PUT') {
+    if(typeof data === 'string'){
+      try{
         JSON.parse(data);
         data = js2xml(data);
       } catch (e) {} // not json so just pass through
-    } else if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
-        data = js2xml(data);
-      }
+    } else if (typeof data === 'object') {
+      data = js2xml(data);
+    }
     options.body = data;
     options.contentType = 'application/xml';
   }
 
+
   var self = this;
 
-  return this.requestPromiseHelper(options).then(function (request) {
-    logger.info({
-      xml: request.body
-    }, 'got response from request');
-    return self.parser.parseStringAsync(request.body);
-  });
+  return this.requestPromiseHelper(options)
+    .then(function(request) {
+      logger.info({
+        xml: request.body
+      }, 'got response from request');
+      return self.parser.parseStringAsync(request.body);
+    });
 };
 
-WorkflowMaxConnector.prototype.requestPromiseHelper = function requestPromiseHelper(options) {
+WorkflowMaxConnector.prototype.requestPromiseHelper = function requestPromiseHelper (options) {
   return requestPromise(options);
 };
 
@@ -128,5 +128,5 @@ WorkflowMaxConnector.defaultSettings = function () {
   });
 };
 
+
 module.exports = WorkflowMaxConnector;
-//# sourceMappingURL=connector.js.map
