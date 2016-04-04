@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">tests/unit_tests/connector_tests.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  <a data-ice="repoURL" href="https://github.com/hoist/hoist-connector-workflowmax.git" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">views</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/views/edit.js~EditForm.html">EditForm</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">tests/unit_tests/connector_tests.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">&apos;use strict&apos;;
+require(&apos;../bootstrap&apos;);
+var WorkflowMax = require(&apos;../../lib/connector&apos;);
+var sinon = require(&apos;sinon&apos;);
+var BBPromise = require(&apos;bluebird&apos;);
+var expect = require(&apos;chai&apos;).expect;
+var requestPromise = require(&apos;request-promise&apos;);
+var config = require(&apos;config&apos;);
+var errors = require(&apos;@hoist/errors&apos;);
+
+describe(&apos;WorkflowMaxConnector&apos;, function () {
+  var connector;
+  before(function () {
+    connector = new WorkflowMax({
+      apiKey: config.apiKey,
+      accountKey: config.accountKey,
+      domain: config.domain + &apos;test&apos;
+    });
+    console.log(config);
+  });
+  describe(&apos;#get&apos;, function () {
+    describe(&apos;with no queryParams&apos;, function () {
+      var response = {};
+      var result;
+      before(function () {
+        sinon.stub(connector, &apos;request&apos;).returns(BBPromise.resolve(response));
+        result = connector.get(&apos;job.api&apos;);
+      });
+      after(function () {
+        connector.request.restore();
+      });
+      it(&apos;calls #request&apos;, function () {
+        expect(connector.request)
+          .to.have.been.calledWith(&apos;GET&apos;, &apos;job.api&apos;, undefined);
+      });
+    });
+    describe(&apos;with queryParams&apos;, function () {
+      var response = {};
+      var result;
+      var queryParams = {
+        query: &apos;query&apos;
+      };
+      before(function () {
+        sinon.stub(connector, &apos;request&apos;).returns(BBPromise.resolve(response));
+        result = connector.get(&apos;job.api&apos;, queryParams);
+      });
+      after(function () {
+        connector.request.restore();
+      });
+      it(&apos;calls #request&apos;, function () {
+        expect(connector.request)
+          .to.have.been.calledWith(&apos;GET&apos;, &apos;job.api&apos;, queryParams);
+      });
+    });
+  });
+  describe(&apos;#post&apos;, function() {
+    describe(&apos;with no data&apos;, function () {
+      it(&apos;rejects&apos;, function () {
+        expect(function () {
+          connector.post(&apos;/path&apos;);
+        }).to.throw(errors.connector.request.InvalidError);
+      });
+    });
+    describe(&apos;with data&apos;, function () {
+      var response = {};
+      var result;
+      var data = {
+        query: &apos;query&apos;
+      };
+      before(function () {
+        sinon.stub(connector, &apos;request&apos;).returns(BBPromise.resolve(response));
+        result = connector.post(&apos;staff.api/add&apos;, data);
+      });
+      after(function () {
+        connector.request.restore();
+      });
+      it(&apos;calls #request&apos;, function () {
+        expect(connector.request)
+          .to.have.been.calledWith(&apos;POST&apos;, &apos;staff.api/add&apos;, null, data);
+      });
+    });
+  });
+  describe(&apos;#put&apos;, function() {
+    describe(&apos;with no data&apos;, function () {
+      it(&apos;rejects&apos;, function () {
+        expect(function () {
+          connector.put(&apos;/path&apos;);
+        }).to.throw(errors.connector.request.InvalidError);
+      });
+    });
+    describe(&apos;with data&apos;, function () {
+      var response = {};
+      var result;
+      var data = {
+        query: &apos;query&apos;
+      };
+      before(function () {
+        sinon.stub(connector, &apos;request&apos;).returns(BBPromise.resolve(response));
+        result = connector.put(&apos;client.api/update&apos;, data);
+      });
+      after(function () {
+        connector.request.restore();
+      });
+      it(&apos;calls #request&apos;, function () {
+        expect(connector.request)
+          .to.have.been.calledWith(&apos;PUT&apos;, &apos;client.api/update&apos;, null, data);
+      });
+    });
+  });
+  describe(&apos;#delete&apos;, function () {
+    var response = {};
+    var result;
+    before(function () {
+      sinon.stub(connector, &apos;request&apos;).returns(BBPromise.resolve(response));
+      result = connector.delete(&apos;job.api&apos;);
+    });
+    after(function () {
+      connector.request.restore();
+    });
+    it(&apos;calls #request&apos;, function () {
+      expect(connector.request)
+        .to.have.been.calledWith(&apos;DELETE&apos;, &apos;job.api&apos;, undefined, undefined);
+    });
+  });
+  describe(&apos;#request&apos;, function () {
+    describe(&apos;GET&apos;, function () {
+      describe(&apos;with no queryParams&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var options = {
+          method: &apos;GET&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/job.api/current?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey
+        }
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;GET&apos;, &apos;/job.api/current&apos;);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+      describe(&apos;with no queryParams, with no domain in settings&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var options = {
+          method: &apos;GET&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.com/job.api/current?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey
+        }
+        var result;
+        before(function () {
+          connector.settings.domain = undefined;
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;GET&apos;, &apos;/job.api/current&apos;);
+        });
+        after(function () {
+          connector.settings.domain = config.domain + &apos;test&apos;;
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+
+      describe(&apos;with queryParams object&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var queryParams = {
+          query: &apos;query&apos;
+        };
+        var options = {
+          method: &apos;GET&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/job.api/current?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey + &apos;&amp;query=&apos; + queryParams.query
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;GET&apos;, &apos;job.api/current&apos;, queryParams);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+
+      describe(&apos;with queryParams in path&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var options = {
+          method: &apos;GET&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/job.api/current?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey + &apos;&amp;query=query&apos;
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;GET&apos;, &apos;job.api/current?query=query&apos;);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+
+      describe(&apos;with queryParams in path and object&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var queryParams = {
+          query: &apos;query&apos;
+        };
+        var options = {
+          method: &apos;GET&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/job.api/current?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey + &apos;&amp;querypath=querypath&amp;query=&apos; + queryParams.query
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;GET&apos;, &apos;job.api/current?querypath=querypath&apos;, queryParams);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+      describe(&apos;with duplicate queryParams in path and object&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var queryParams = {
+          query: &apos;query&apos;
+        };
+        var options = {
+          method: &apos;GET&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/job.api/current?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey + &apos;&amp;query=&apos; + queryParams.query
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;GET&apos;, &apos;job.api/current?query=queryfalse&apos;, queryParams);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper correctly&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+    });
+    describe(&apos;POST&apos;, function () {
+      describe(&apos;with xml string&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var data = &apos;&lt;Staff&gt;&lt;Name&gt;John&lt;/Name&gt;&lt;/Staff&gt;&apos;;
+        var options = {
+          method: &apos;POST&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/staff.api/add?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey,
+          body: data,
+          contentType: &apos;application/xml&apos;
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;POST&apos;, &apos;staff.api/add&apos;, null, data);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+      describe(&apos;with json string&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var data = &apos;{&quot;Staff&quot;:{&quot;Name&quot;:&quot;John&quot;}}&apos;;
+        var xml = &apos;&lt;Staff&gt;&lt;Name&gt;John&lt;/Name&gt;&lt;/Staff&gt;&apos;;
+        var options = {
+          method: &apos;POST&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/staff.api/add?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey,
+          body: xml,
+          contentType: &apos;application/xml&apos;
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;POST&apos;, &apos;staff.api/add&apos;, null, data);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+      describe(&apos;with object&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var data = {Staff:{Name:&quot;John&quot;}};
+        var xml = &apos;&lt;Staff&gt;&lt;Name&gt;John&lt;/Name&gt;&lt;/Staff&gt;&apos;;
+        var options = {
+          method: &apos;POST&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/staff.api/add?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey,
+          body: xml,
+          contentType: &apos;application/xml&apos;
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;POST&apos;, &apos;staff.api/add&apos;, null, data);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+    });
+    describe(&apos;PUT&apos;, function () {
+      describe(&apos;with xml string&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var data = &apos;&lt;Staff&gt;&lt;Name&gt;John&lt;/Name&gt;&lt;/Staff&gt;&apos;;
+        var options = {
+          method: &apos;PUT&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/staff.api/add?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey,
+          body: data,
+          contentType: &apos;application/xml&apos;
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;PUT&apos;, &apos;staff.api/add&apos;, null, data);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+      describe(&apos;with json string&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var data = &apos;{&quot;Staff&quot;:{&quot;Name&quot;:&quot;John&quot;}}&apos;;
+        var xml = &apos;&lt;Staff&gt;&lt;Name&gt;John&lt;/Name&gt;&lt;/Staff&gt;&apos;;
+        var options = {
+          method: &apos;PUT&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/staff.api/add?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey,
+          body: xml,
+          contentType: &apos;application/xml&apos;
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;PUT&apos;, &apos;staff.api/add&apos;, null, data);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+      describe(&apos;with object&apos;, function () {
+        var response = {
+          body: &apos;body&apos;
+        };
+        var data = {Staff:{Name:&quot;John&quot;}};
+        var xml = &apos;&lt;Staff&gt;&lt;Name&gt;John&lt;/Name&gt;&lt;/Staff&gt;&apos;;
+        var options = {
+          method: &apos;PUT&apos;,
+          resolveWithFullResponse: true,
+          uri: &apos;https://api.workflowmax.comtest/staff.api/add?apiKey=&apos; + config.apiKey + &apos;&amp;accountKey=&apos; + config.accountKey,
+          body: xml,
+          contentType: &apos;application/xml&apos;
+        };
+        var result;
+        before(function () {
+          sinon.stub(connector, &apos;requestPromiseHelper&apos;).returns(BBPromise.resolve(response));
+          sinon.stub(connector.parser, &apos;parseStringAsync&apos;).returns(BBPromise.resolve());
+          result = connector.request(&apos;PUT&apos;, &apos;staff.api/add&apos;, null, data);
+        });
+        after(function () {
+          connector.requestPromiseHelper.restore();
+          connector.parser.parseStringAsync.restore();
+        });
+        it(&apos;calls requestPromiseHelper&apos;, function () {
+          expect(connector.requestPromiseHelper)
+            .to.have.been.calledWith(options);
+        });
+        it(&apos;calls parser.parseStringAsync&apos;, function () {
+          expect(connector.parser.parseStringAsync)
+            .to.have.been.calledWith(response.body);
+        });
+      });
+    });
+    describe(&apos;with no path&apos;, function () {
+      it(&apos;rejects&apos;, function () {
+        expect(function () {
+          connector.request();
+        }).to.throw(errors.connector.request.InvalidError);
+      });
+    });
+  });
+  describe(&apos;#authorize&apos;, function () {
+    describe(&apos;with accountKey and apiKey and domain&apos;, function () {
+      var options = {
+        apiKey: &apos;apiKey&apos;,
+        accountKey: &apos;accountKey&apos;,
+        domain: &apos;newdomain&apos;
+      }
+      before(function () {
+        return connector.authorize(options);
+      });
+      after(function () {
+        connector.settings = {
+          apiKey: config.apiKey,
+          accountKey: config.accountKey
+        };
+      });
+      it(&apos;sets the apiKey&apos;, function () {
+        expect(connector.settings.apiKey).to.eql(options.apiKey);
+      });
+      it(&apos;sets the accountKey&apos;, function () {
+        expect(connector.settings.accountKey).to.eql(options.accountKey);
+      });
+      it(&apos;sets the domain&apos;, function () {
+        expect(connector.settings.domain).to.eql(options.domain);
+      });
+    });
+    describe(&apos;with only domain&apos;, function () {
+      var options = {
+        domain: &apos;domain&apos;
+      }
+      before(function () {
+        return connector.authorize(options);
+      });
+      after(function () {
+        connector.settings = {
+          apiKey: config.apiKey,
+          accountKey: config.accountKey,
+          domain: config.domain + &apos;test&apos;
+        };
+      });
+      it(&apos;does not change the apiKey&apos;, function () {
+        expect(connector.settings.apiKey).to.eql(config.apiKey);
+      });
+      it(&apos;does not change the accountKey&apos;, function () {
+        expect(connector.settings.accountKey).to.eql(config.accountKey);
+      });
+      it(&apos;sets the domain&apos;, function () {
+        expect(connector.settings.domain).to.eql(options.domain);
+      });
+    });
+    describe(&apos;with only accountKey&apos;, function () {
+      var options = {
+        accountKey: &apos;accountKey&apos;
+      }
+      before(function () {
+        return connector.authorize(options);
+      });
+      after(function () {
+        connector.settings = {
+          apiKey: config.apiKey,
+          accountKey: config.accountKey
+        };
+      });
+      it(&apos;does not change the apiKey&apos;, function () {
+        expect(connector.settings.apiKey).to.eql(config.apiKey);
+      });
+      it(&apos;sets the accountKey&apos;, function () {
+        expect(connector.settings.accountKey).to.eql(options.accountKey);
+      });
+      it(&apos;does not change the domain&apos;, function () {
+        expect(connector.settings.domain).to.eql(config.domain + &apos;test&apos;);
+      });
+    });
+    describe(&apos;with only apiKey&apos;, function () {
+      var options = {
+        apiKey: &apos;apiKey&apos;
+      }
+      before(function () {
+        return connector.authorize(options);
+      });
+      after(function () {
+        connector.settings = {
+          apiKey: config.apiKey,
+          accountKey: config.accountKey
+        };
+      });
+      it(&apos;sets the apiKey&apos;, function () {
+        expect(connector.settings.apiKey).to.eql(options.apiKey);
+      });
+      it(&apos;does not change the accountKey&apos;, function () {
+        expect(connector.settings.accountKey).to.eql(config.accountKey);
+      });
+    });
+  });
+});
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.6)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
